@@ -230,7 +230,7 @@ export default function AutoTrader({ userAddress }: AutoTraderProps) {
 
       {/* Thông báo */}
       {successMessage && (
-        <div className="bg-green-900 border-l-4 border-green-500 text-green-200 px-4 py-3 rounded shadow-md mb-4 animate-fadeIn transform transition-all hover:scale-[1.01]">
+        <div className="success-alert">
           <div className="flex">
             <div className="py-1 mr-2">
               <svg
@@ -255,7 +255,7 @@ export default function AutoTrader({ userAddress }: AutoTraderProps) {
         </div>
       )}
       {errorMessage && (
-        <div className="bg-red-900 border-l-4 border-red-500 text-red-200 px-4 py-3 rounded shadow-md mb-4 animate-fadeIn transform transition-all hover:scale-[1.01]">
+        <div className="error-alert">
           <div className="flex">
             <div className="py-1 mr-2">
               <svg
@@ -304,7 +304,7 @@ export default function AutoTrader({ userAddress }: AutoTraderProps) {
         </p>
         <h4 className="font-medium text-blue-300 mt-4 mb-2 flex items-center">
           <svg
-            className="h-4 w-4 mr-2 transform transition-transform group-hover:rotate-180"
+            className="h-4 w-4 mr-2 transition-transform group-hover:rotate-180"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -319,7 +319,7 @@ export default function AutoTrader({ userAddress }: AutoTraderProps) {
           Các tùy chọn:
         </h4>
         <ul className="list-none text-sm space-y-2 ml-2 text-gray-300">
-          <li className="flex items-start transform transition-all duration-200 hover:translate-x-1">
+          <li className="flex items-start transition-all duration-200 hover:[transform:translateX(0.25rem)]">
             <svg
               className="h-4 w-4 mr-2 text-blue-400 mt-0.5"
               fill="none"
@@ -335,7 +335,7 @@ export default function AutoTrader({ userAddress }: AutoTraderProps) {
             </svg>
             <span>Có thể tạo một đợt lệnh hoặc tự động tạo theo chu kỳ</span>
           </li>
-          <li className="flex items-start transform transition-all duration-200 hover:translate-x-1">
+          <li className="flex items-start transition-all duration-200 hover:[transform:translateX(0.25rem)]">
             <svg
               className="h-4 w-4 mr-2 text-blue-400 mt-0.5"
               fill="none"
@@ -351,7 +351,7 @@ export default function AutoTrader({ userAddress }: AutoTraderProps) {
             </svg>
             <span>Có thể chọn token cụ thể hoặc tất cả token</span>
           </li>
-          <li className="flex items-start transform transition-all duration-200 hover:translate-x-1">
+          <li className="flex items-start transition-all duration-200 hover:[transform:translateX(0.25rem)]">
             <svg
               className="h-4 w-4 mr-2 text-blue-400 mt-0.5"
               fill="none"
@@ -369,7 +369,7 @@ export default function AutoTrader({ userAddress }: AutoTraderProps) {
               Có thể tùy chỉnh số lượng, giới hạn đợt, và khoảng thời gian
             </span>
           </li>
-          <li className="flex items-start transform transition-all duration-200 hover:translate-x-1">
+          <li className="flex items-start transition-all duration-200 hover:[transform:translateX(0.25rem)]">
             <svg
               className="h-4 w-4 mr-2 text-blue-400 mt-0.5"
               fill="none"
@@ -385,7 +385,7 @@ export default function AutoTrader({ userAddress }: AutoTraderProps) {
             </svg>
             <span>Có thể chạy nhiều tiến trình tạo lệnh tự động cùng lúc</span>
           </li>
-          <li className="flex items-start transform transition-all duration-200 hover:translate-x-1">
+          <li className="flex items-start transition-all duration-200 hover:[transform:translateX(0.25rem)]">
             <svg
               className="h-4 w-4 mr-2 text-blue-400 mt-0.5"
               fill="none"

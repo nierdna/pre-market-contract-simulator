@@ -39,29 +39,40 @@ export default function Dashboard({ activeUser }: DashboardProps) {
   return (
     <div className="h-full">
       {/* Header with user info */}
-      <div className="bg-white dark:bg-gray-800 shadow-md p-4">
+      <div className="bg-dark-100 shadow-md p-4 border-b border-gray-700">
         <div className="flex justify-between items-center">
           <div>
-            <h2 className="text-xl font-semibold">
+            <h2 className="text-xl font-semibold text-gray-200 flex items-center">
+              <svg
+                className="h-5 w-5 mr-2 text-blue-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                />
+              </svg>
               Welcome, {currentUser.name}
             </h2>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              {currentUser.address}
-            </p>
+            <p className="text-sm text-gray-400 ml-7">{currentUser.address}</p>
           </div>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="bg-gray-200 dark:bg-gray-700 px-4">
-        <div className="flex overflow-x-auto">
+      <div className="bg-dark-300 px-4 border-b border-gray-700">
+        <div className="flex overflow-x-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-dark-100">
           {availableTabs.map((tab) => (
             <button
               key={tab.id}
-              className={`px-4 py-3 font-medium text-sm whitespace-nowrap ${
+              className={`px-4 py-3 font-medium text-sm whitespace-nowrap transition-all duration-200 ${
                 activeTab === tab.id
-                  ? "border-b-2 border-blue-500 text-blue-600 dark:text-blue-400"
-                  : "text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white"
+                  ? "border-b-2 border-blue-500 text-blue-400"
+                  : "text-gray-300 hover:text-gray-100"
               }`}
               onClick={() => setActiveTab(tab.id)}
             >
@@ -72,7 +83,7 @@ export default function Dashboard({ activeUser }: DashboardProps) {
       </div>
 
       {/* Content */}
-      <div className="p-6">
+      <div className="p-6 bg-dark-200">
         {activeTab === "orders" && (
           <UserOrders userAddress={currentUser.address} />
         )}
