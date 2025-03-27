@@ -9,11 +9,11 @@ interface SidebarProps {
 
 export default function Sidebar({ activeUser, setActiveUser }: SidebarProps) {
   return (
-    <div className="w-64 bg-dark-200 text-gray-200 min-h-screen overflow-y-auto border-r border-gray-700">
-      <div className="p-6 space-y-6">
-        <h1 className="text-2xl font-bold mb-6 text-blue-400 flex items-center">
+    <div className="w-80 bg-dark-200 text-gray-200 min-h-screen overflow-y-auto border-r border-gray-700">
+      <div className="p-8 space-y-8">
+        <h1 className="text-2xl font-bold mb-8 text-blue-400 flex items-center">
           <svg
-            className="h-6 w-6 mr-2 text-blue-500"
+            className="h-7 w-7 mr-3 text-blue-500"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -31,7 +31,7 @@ export default function Sidebar({ activeUser, setActiveUser }: SidebarProps) {
         <div className="component-card">
           <h2 className="subsection-title">
             <svg
-              className="h-5 w-5 mr-2 text-blue-400"
+              className="h-5 w-5 mr-3 text-blue-400"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -45,11 +45,11 @@ export default function Sidebar({ activeUser, setActiveUser }: SidebarProps) {
             </svg>
             Current User
           </h2>
-          <div className="space-y-2 mt-3">
+          <div className="space-y-3 mt-4">
             {Object.entries(users).map(([key, user]) => (
               <button
                 key={key}
-                className={`w-full text-left px-3 py-2 rounded-md transition-all duration-200 ${
+                className={`w-full text-left px-4 py-3 rounded-md transition-all duration-200 ${
                   activeUser === key
                     ? "bg-blue-600 text-white shadow-md"
                     : "bg-dark-100 hover:bg-dark-300 text-gray-300"
@@ -65,10 +65,10 @@ export default function Sidebar({ activeUser, setActiveUser }: SidebarProps) {
           </div>
         </div>
 
-        <div className="component-card mt-6">
+        <div className="component-card mt-8">
           <h2 className="subsection-title">
             <svg
-              className="h-5 w-5 mr-2 text-green-400"
+              className="h-5 w-5 mr-3 text-green-400"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -82,12 +82,12 @@ export default function Sidebar({ activeUser, setActiveUser }: SidebarProps) {
             </svg>
             Market Status
           </h2>
-          <div className="flex items-center space-x-2 mt-3 bg-dark-100 p-3 rounded-lg">
-            <span className="relative flex h-3 w-3 mr-2">
+          <div className="flex items-center space-x-3 mt-4 bg-dark-100 p-4 rounded-lg">
+            <span className="relative flex h-4 w-4 mr-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+              <span className="relative inline-flex rounded-full h-4 w-4 bg-green-500"></span>
             </span>
-            <span>Market Active</span>
+            <span className="font-medium">Market Active</span>
           </div>
         </div>
       </div>

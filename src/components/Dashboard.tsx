@@ -39,12 +39,12 @@ export default function Dashboard({ activeUser }: DashboardProps) {
   return (
     <div className="h-full">
       {/* Header with user info */}
-      <div className="bg-dark-100 shadow-md p-4 border-b border-gray-700">
+      <div className="bg-dark-100 shadow-md p-5 border-b border-gray-700">
         <div className="flex justify-between items-center">
           <div>
             <h2 className="text-xl font-semibold text-gray-200 flex items-center">
               <svg
-                className="h-5 w-5 mr-2 text-blue-400"
+                className="h-6 w-6 mr-3 text-blue-400"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -58,18 +58,18 @@ export default function Dashboard({ activeUser }: DashboardProps) {
               </svg>
               Welcome, {currentUser.name}
             </h2>
-            <p className="text-sm text-gray-400 ml-7">{currentUser.address}</p>
+            <p className="text-sm text-gray-400 ml-9">{currentUser.address}</p>
           </div>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="bg-dark-300 px-4 border-b border-gray-700">
+      <div className="bg-dark-300 px-5 border-b border-gray-700">
         <div className="flex overflow-x-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-dark-100">
           {availableTabs.map((tab) => (
             <button
               key={tab.id}
-              className={`px-4 py-3 font-medium text-sm whitespace-nowrap transition-all duration-200 ${
+              className={`px-5 py-4 font-medium text-sm whitespace-nowrap transition-all duration-200 ${
                 activeTab === tab.id
                   ? "border-b-2 border-blue-500 text-blue-400"
                   : "text-gray-300 hover:text-gray-100"
@@ -83,7 +83,7 @@ export default function Dashboard({ activeUser }: DashboardProps) {
       </div>
 
       {/* Content */}
-      <div className="p-6 bg-dark-200">
+      <div className="p-8 bg-dark-200">
         {activeTab === "orders" && (
           <UserOrders userAddress={currentUser.address} />
         )}
