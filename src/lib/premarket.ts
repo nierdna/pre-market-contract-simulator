@@ -183,6 +183,10 @@ export function autoOpenOrder(
  * @param maxBatches Số lần tạo tối đa (0 = chạy vô hạn)
  * @returns Hàm dừng việc tạo lệnh tự động
  */
+
+// Lưu trữ tất cả các hàm stop cho auto orders đang chạy
+export const autoOrderStopFunctions: (() => void)[] = [];
+
 export function startAutoOpenOrderLoop(
   intervalInSeconds: number = 10,
   ordersPerBatch: number = 1,
@@ -190,21 +194,28 @@ export function startAutoOpenOrderLoop(
   maxBatches: number = 0
 ): () => void {
   let batchesRun = 0;
-  
+
   const runBatch = () => {
     if (maxBatches > 0 && batchesRun >= maxBatches) {
       clearInterval(intervalId);
+      // Xóa khỏi danh sách khi tự kết thúc
+      const index = autoOrderStopFunctions.indexOf(stopFunction);
+      if (index !== -1) {
+        autoOrderStopFunctions.splice(index, 1);
+      }
       console.log(`Auto order creation stopped after ${maxBatches} batches`);
       return;
     }
-    
+
     const orderIds = autoOpenOrder(ordersPerBatch, tokenId);
     batchesRun++;
-    
+
     console.log(
-      `Batch ${batchesRun}: Created ${orderIds.length} orders. IDs: ${orderIds.join(", ")}`
+      `Batch ${batchesRun}: Created ${
+        orderIds.length
+      } orders. IDs: ${orderIds.join(", ")}`
     );
-    
+
     // Tự động match orders sau khi tạo
     if (orderIds.length > 0) {
       try {
@@ -220,15 +231,51 @@ export function startAutoOpenOrderLoop(
       }
     }
   };
-  
+
   // Chạy lần đầu ngay lập tức
   runBatch();
-  
+
   // Thiết lập chạy theo chu kỳ
   const intervalId = setInterval(runBatch, intervalInSeconds * 1000);
-  
+
+  // Tạo hàm stop
+  const stopFunction = () => {
+    clearInterval(intervalId);
+    // Xóa khỏi danh sách khi dừng thủ công
+    const index = autoOrderStopFunctions.indexOf(stopFunction);
+    if (index !== -1) {
+      autoOrderStopFunctions.splice(index, 1);
+    }
+    console.log(
+      `Auto order creation manually stopped after ${batchesRun} batches`
+    );
+  };
+
+  // Thêm vào danh sách các hàm stop đang chạy
+  autoOrderStopFunctions.push(stopFunction);
+
   // Trả về hàm dừng interval
-  return () => clearInterval(intervalId);
+  return stopFunction;
+}
+
+/**
+ * Dừng tất cả các lệnh tự động đang chạy
+ *
+ * @returns Số lượng tiến trình đã dừng
+ */
+export function stopAllAutoOpenOrders(): number {
+  const count = autoOrderStopFunctions.length;
+
+  // Gọi tất cả các hàm stop
+  while (autoOrderStopFunctions.length > 0) {
+    const stopFn = autoOrderStopFunctions.pop();
+    if (stopFn) {
+      stopFn();
+    }
+  }
+
+  console.log(`Stopped all ${count} auto order processes`);
+  return count;
 }
 
 // Export các types cần thiết

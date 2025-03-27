@@ -5,6 +5,8 @@ import {
   simulator,
   autoOpenOrder,
   startAutoOpenOrderLoop,
+  stopAllAutoOpenOrders,
+  autoOrderStopFunctions,
 } from "@/lib/premarket";
 
 interface AutoTraderProps {
@@ -22,6 +24,7 @@ export default function AutoTrader({ userAddress }: AutoTraderProps) {
 
   const [isLoading, setIsLoading] = useState(false);
   const [isAutoRunning, setIsAutoRunning] = useState(false);
+  const [activeProcessCount, setActiveProcessCount] = useState(0);
   const [stopAutoFn, setStopAutoFn] = useState<(() => void) | null>(null);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -55,6 +58,24 @@ export default function AutoTrader({ userAddress }: AutoTraderProps) {
     };
 
     fetchTokens();
+  }, []);
+
+  // Cập nhật số lượng tiến trình đang chạy
+  useEffect(() => {
+    const updateProcessCount = () => {
+      setActiveProcessCount(autoOrderStopFunctions.length);
+      setIsAutoRunning(autoOrderStopFunctions.length > 0);
+    };
+
+    // Cập nhật lần đầu
+    updateProcessCount();
+
+    // Cập nhật mỗi giây để theo dõi số lượng tiến trình
+    const intervalId = window.setInterval(updateProcessCount, 1000);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
   }, []);
 
   const handleSingleBatch = (e: React.FormEvent) => {
@@ -187,9 +208,18 @@ export default function AutoTrader({ userAddress }: AutoTraderProps) {
     if (stopAutoFn) {
       stopAutoFn();
       setStopAutoFn(null);
-      setIsAutoRunning(false);
+      setIsAutoRunning(autoOrderStopFunctions.length > 0);
       setSuccessMessage("Đã dừng tạo lệnh tự động");
     }
+  };
+
+  const handleStopAllAutoLoops = () => {
+    const stoppedCount = stopAllAutoOpenOrders();
+    setStopAutoFn(null);
+    setIsAutoRunning(false);
+    setSuccessMessage(
+      `Đã dừng tất cả ${stoppedCount} tiến trình tạo lệnh tự động`
+    );
   };
 
   return (
@@ -207,6 +237,25 @@ export default function AutoTrader({ userAddress }: AutoTraderProps) {
           {errorMessage}
         </div>
       )}
+
+      {/* Phần hướng dẫn sử dụng */}
+      <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+        <h3 className="text-lg font-semibold mb-2 text-blue-800">
+          Hướng dẫn sử dụng
+        </h3>
+        <p className="mb-2">
+          Chức năng này cho phép tạo tự động các lệnh mua/bán ngẫu nhiên với giá
+          từ 0.8 đến 1.2 để mô phỏng thị trường hoạt động.
+        </p>
+        <h4 className="font-medium text-blue-700 mt-3 mb-1">Các tùy chọn:</h4>
+        <ul className="list-disc list-inside text-sm space-y-1">
+          <li>Có thể tạo một đợt lệnh hoặc tự động tạo theo chu kỳ</li>
+          <li>Có thể chọn token cụ thể hoặc tất cả token</li>
+          <li>Có thể tùy chỉnh số lượng, giới hạn đợt, và khoảng thời gian</li>
+          <li>Có thể chạy nhiều tiến trình tạo lệnh tự động cùng lúc</li>
+          <li>Có thể dừng riêng từng tiến trình hoặc dừng tất cả</li>
+        </ul>
+      </div>
 
       {/* Phần cấu hình chung */}
       <div className="bg-white p-4 rounded-lg shadow-md">
@@ -295,20 +344,42 @@ export default function AutoTrader({ userAddress }: AutoTraderProps) {
       {/* Form tạo lệnh tự động */}
       <div className="bg-white p-4 rounded-lg shadow-md">
         <h3 className="text-xl font-semibold mb-4">Tự Động Tạo Lệnh</h3>
-        {isAutoRunning ? (
+
+        {/* Hiển thị số lượng tiến trình đang chạy */}
+        {activeProcessCount > 0 && (
+          <div className="mb-4 p-3 bg-blue-50 rounded border border-blue-200">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <span className="relative flex h-3 w-3 mr-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
+                </span>
+                <span>Có {activeProcessCount} tiến trình đang chạy</span>
+              </div>
+              <button
+                onClick={handleStopAllAutoLoops}
+                className="bg-red-600 text-white py-1 px-3 text-sm rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+              >
+                Dừng Tất Cả
+              </button>
+            </div>
+          </div>
+        )}
+
+        {isAutoRunning && stopAutoFn ? (
           <>
             <div className="mb-4 flex items-center">
               <span className="relative flex h-3 w-3 mr-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
               </span>
-              <span>Đang chạy tự động</span>
+              <span>Tiến trình hiện tại đang chạy</span>
             </div>
             <button
               onClick={handleStopAutoLoop}
               className="w-full bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
             >
-              Dừng Tự Động
+              Dừng Tiến Trình Hiện Tại
             </button>
           </>
         ) : (
