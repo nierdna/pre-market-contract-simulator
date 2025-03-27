@@ -2,14 +2,20 @@
 
 import { useEffect, useState } from "react";
 import { simulator, OpenOrderStatus, OpenOrderType } from "@/lib/premarket";
+import type { Order, OpenOrder } from "@/lib/simulator/PreMarketSimulator";
 
 interface UserOrdersProps {
   userAddress: string;
 }
 
 export default function UserOrders({ userAddress }: UserOrdersProps) {
-  const [openOrders, setOpenOrders] = useState<any[]>([]);
-  const [matchedOrders, setMatchedOrders] = useState<any[]>([]);
+  const [openOrders, setOpenOrders] = useState<OpenOrder[]>([]);
+  const [matchedOrders, setMatchedOrders] = useState<Order[]>([]);
+  const [exitOrderModalOpen, setExitOrderModalOpen] = useState(false);
+  const [selectedOrderForExit, setSelectedOrderForExit] =
+    useState<Order | null>(null);
+  const [exitAmount, setExitAmount] = useState("");
+  const [exitPrice, setExitPrice] = useState("");
 
   // Fetch user orders on component mount or when user changes
   useEffect(() => {
@@ -62,6 +68,45 @@ export default function UserOrders({ userAddress }: UserOrdersProps) {
       console.error("Error cancelling order:", error);
       alert(
         `Failed to cancel order: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+  };
+
+  // Function to open exit order modal
+  const openExitOrderModal = (order: Order) => {
+    setSelectedOrderForExit(order);
+    setExitAmount(order.amount.toString());
+    setExitPrice("");
+    setExitOrderModalOpen(true);
+  };
+
+  // Function to submit exit order
+  const handleExitOrder = () => {
+    if (!selectedOrderForExit || !exitAmount || !exitPrice) return;
+
+    try {
+      const exitAmountNum = parseFloat(exitAmount);
+      const exitPriceNum = parseFloat(exitPrice);
+
+      if (isNaN(exitAmountNum) || isNaN(exitPriceNum)) {
+        throw new Error("Amount and price must be valid numbers");
+      }
+
+      simulator.exitOrderWithNewOpenOrder(
+        selectedOrderForExit.id,
+        exitAmountNum,
+        exitPriceNum,
+        userAddress
+      );
+
+      setExitOrderModalOpen(false);
+      fetchUserOrders(); // Refresh the list
+    } catch (error) {
+      console.error("Error creating exit order:", error);
+      alert(
+        `Failed to create exit order: ${
           error instanceof Error ? error.message : String(error)
         }`
       );
@@ -171,6 +216,7 @@ export default function UserOrders({ userAddress }: UserOrdersProps) {
                   <th className="py-3 px-4 text-left">Sell Price</th>
                   <th className="py-3 px-4 text-left">Status</th>
                   <th className="py-3 px-4 text-left">Counterparty</th>
+                  <th className="py-3 px-4 text-left">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -203,6 +249,16 @@ export default function UserOrders({ userAddress }: UserOrdersProps) {
                       <td className="py-3 px-4 truncate max-w-[200px]">
                         {counterparty}
                       </td>
+                      <td className="py-3 px-4">
+                        {order.isActive && (
+                          <button
+                            onClick={() => openExitOrderModal(order)}
+                            className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-2 rounded text-sm"
+                          >
+                            Exit Position
+                          </button>
+                        )}
+                      </td>
                     </tr>
                   );
                 })}
@@ -213,6 +269,80 @@ export default function UserOrders({ userAddress }: UserOrdersProps) {
           <p className="text-gray-500">No matched orders found.</p>
         )}
       </div>
+
+      {/* Exit Order Modal */}
+      {exitOrderModalOpen && selectedOrderForExit && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-md w-full">
+            <h3 className="text-xl font-semibold mb-4">Exit Position</h3>
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">
+                Order ID: {selectedOrderForExit.id}
+              </label>
+              <p className="text-sm mb-2">
+                Role:{" "}
+                {selectedOrderForExit.buyer === userAddress
+                  ? "Buyer"
+                  : "Seller"}
+              </p>
+              <p className="text-sm mb-4">
+                Available Amount:{" "}
+                {selectedOrderForExit.amount -
+                  (selectedOrderForExit.exitedAmount || 0)}
+              </p>
+
+              <div className="mb-3">
+                <label className="block text-sm font-medium mb-1">
+                  Exit Amount
+                </label>
+                <input
+                  type="number"
+                  value={exitAmount}
+                  onChange={(e) => setExitAmount(e.target.value)}
+                  className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded"
+                  max={
+                    selectedOrderForExit.amount -
+                    (selectedOrderForExit.exitedAmount || 0)
+                  }
+                  min="0.01"
+                  step="0.01"
+                />
+              </div>
+
+              <div className="mb-3">
+                <label className="block text-sm font-medium mb-1">
+                  Exit Price
+                </label>
+                <input
+                  type="number"
+                  value={exitPrice}
+                  onChange={(e) => setExitPrice(e.target.value)}
+                  className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded"
+                  min="0.01"
+                  step="0.01"
+                  placeholder="Enter new price"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => setExitOrderModalOpen(false)}
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleExitOrder}
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                disabled={!exitAmount || !exitPrice}
+              >
+                Create Exit Order
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
