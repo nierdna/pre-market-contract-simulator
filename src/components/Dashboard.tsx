@@ -8,6 +8,7 @@ import OrderMatching from "./dashboard/OrderMatching";
 import OrderSettlement from "./dashboard/OrderSettlement";
 import UserOrders from "./dashboard/UserOrders";
 import EventLog from "./dashboard/EventLog";
+import AutoTrader from "./dashboard/AutoTrader";
 import { users } from "@/lib/premarket";
 
 interface DashboardProps {
@@ -24,6 +25,7 @@ export default function Dashboard({ activeUser }: DashboardProps) {
     { id: "place-order", label: "Place Order", access: "all" },
     { id: "match-orders", label: "Match Orders", access: "owner" },
     { id: "settlement", label: "Settlement", access: "all" },
+    { id: "auto-trader", label: "Auto Trader", access: "owner" },
     { id: "tokens", label: "Token Management", access: "owner" },
     { id: "market", label: "Market Settings", access: "owner" },
     { id: "events", label: "Event Log", access: "all" },
@@ -82,6 +84,9 @@ export default function Dashboard({ activeUser }: DashboardProps) {
         )}
         {activeTab === "settlement" && (
           <OrderSettlement userAddress={currentUser.address} />
+        )}
+        {activeTab === "auto-trader" && (
+          <AutoTrader userAddress={currentUser.address} />
         )}
         {activeTab === "tokens" && (
           <TokenManagement userAddress={currentUser.address} />
