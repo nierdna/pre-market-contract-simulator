@@ -19,9 +19,26 @@ interface OpenOrderDisplay {
   matchedAmount: number;
 }
 
+// Định nghĩa kiểu dữ liệu cho Order đã match
+interface MatchedOrderDisplay {
+  id: number;
+  buyOpenOrderId: number;
+  sellOpenOrderId: number;
+  buyer: string;
+  seller: string;
+  amount: number;
+  buyPrice: number;
+  sellPrice: number;
+  isActive: boolean;
+  tokenId: number;
+  exitedAmount: number;
+  settlementStatus: number;
+}
+
 export default function OrderMatching({ userAddress }: OrderMatchingProps) {
   const [buyOrders, setBuyOrders] = useState<OpenOrderDisplay[]>([]);
   const [sellOrders, setSellOrders] = useState<OpenOrderDisplay[]>([]);
+  const [matchedOrders, setMatchedOrders] = useState<MatchedOrderDisplay[]>([]);
   const [selectedBuyOrder, setSelectedBuyOrder] =
     useState<OpenOrderDisplay | null>(null);
   const [selectedSellOrder, setSelectedSellOrder] =
@@ -35,20 +52,28 @@ export default function OrderMatching({ userAddress }: OrderMatchingProps) {
     { id: number; name: string }[]
   >([]);
 
-  // Fetch open orders
+  // Fetch open orders and matched orders
   useEffect(() => {
     fetchOpenOrders();
+    fetchMatchedOrders();
     fetchAvailableTokens();
 
     // Listen for events
-    simulator.onOpenOrderCreated(() => fetchOpenOrders());
-    simulator.onOpenOrderMatched(() => fetchOpenOrders());
+    simulator.onOpenOrderCreated(() => {
+      fetchOpenOrders();
+      fetchMatchedOrders();
+    });
+    simulator.onOpenOrderMatched(() => {
+      fetchOpenOrders();
+      fetchMatchedOrders();
+    });
     simulator.onOpenOrderCancelled(() => fetchOpenOrders());
   }, []);
 
   // Re-fetch when tokenId changes
   useEffect(() => {
     fetchOpenOrders();
+    fetchMatchedOrders();
   }, [selectedTokenId]);
 
   const fetchAvailableTokens = () => {
@@ -124,6 +149,61 @@ export default function OrderMatching({ userAddress }: OrderMatchingProps) {
       setSellOrders(sellOrdersFiltered);
     } catch (err) {
       console.error("Error fetching open orders:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchMatchedOrders = () => {
+    setIsLoading(true);
+    try {
+      // Lấy danh sách các order đã match
+      const matchedOrdersFiltered: MatchedOrderDisplay[] = [];
+
+      // Lấy tổng số order từ counter
+      const totalOrders = simulator.getOrderIdCounter();
+
+      // Duyệt qua tất cả order IDs để lấy thông tin
+      for (let i = 1; i <= totalOrders; i++) {
+        try {
+          // Lấy thông tin chi tiết của order
+          const order = simulator.getOrder(i);
+
+          // Lọc theo tokenId nếu có filter
+          if (selectedTokenId > 0 && order.tokenId !== selectedTokenId) {
+            continue;
+          }
+
+          // Tạo object hiển thị
+          const displayOrder: MatchedOrderDisplay = {
+            id: order.id,
+            buyOpenOrderId: order.buyOpenOrderId,
+            sellOpenOrderId: order.sellOpenOrderId,
+            buyer: order.buyer,
+            seller: order.seller,
+            amount: order.amount,
+            buyPrice: order.buyPrice,
+            sellPrice: order.sellPrice,
+            isActive: order.isActive,
+            tokenId: order.tokenId,
+            exitedAmount: order.exitedAmount,
+            settlementStatus: order.settlementStatus,
+          };
+
+          // Thêm vào danh sách
+          matchedOrdersFiltered.push(displayOrder);
+        } catch {
+          // Bỏ qua orders không thể truy xuất
+        }
+      }
+
+      // Sắp xếp theo ID (mới nhất lên đầu)
+      matchedOrdersFiltered.sort((a, b) => b.id - a.id);
+
+      // Cập nhật state
+      setMatchedOrders(matchedOrdersFiltered);
+    } catch (err) {
+      console.error("Error fetching matched orders:", err);
     } finally {
       setIsLoading(false);
     }
@@ -493,6 +573,85 @@ export default function OrderMatching({ userAddress }: OrderMatchingProps) {
           >
             {isLoading ? "Processing..." : "Match Orders"}
           </button>
+        </div>
+      </div>
+
+      {/* Matched Orders Section */}
+      <div className="mt-8">
+        <h3 className="text-lg font-semibold mb-3">Matched Orders</h3>
+        <div className="overflow-x-auto">
+          <table className="min-w-full bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden">
+            <thead className="bg-gray-50 dark:bg-gray-700">
+              <tr>
+                <th className="py-3 px-4 text-left">ID</th>
+                <th className="py-3 px-4 text-left">Token</th>
+                <th className="py-3 px-4 text-left">Buy Order</th>
+                <th className="py-3 px-4 text-left">Sell Order</th>
+                <th className="py-3 px-4 text-left">Amount</th>
+                <th className="py-3 px-4 text-left">Buy Price</th>
+                <th className="py-3 px-4 text-left">Sell Price</th>
+                <th className="py-3 px-4 text-left">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+              {matchedOrders.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={8}
+                    className="py-4 px-4 text-center text-gray-500"
+                  >
+                    No matched orders available
+                  </td>
+                </tr>
+              ) : (
+                matchedOrders.map((order) => {
+                  // Determine settlement status text
+                  let statusText = "";
+                  let statusClass = "";
+
+                  switch (order.settlementStatus) {
+                    case 0:
+                      statusText = "Pending";
+                      statusClass = "text-yellow-600";
+                      break;
+                    case 1:
+                      statusText = "Settled";
+                      statusClass = "text-green-600";
+                      break;
+                    case 2:
+                      statusText = "Failed";
+                      statusClass = "text-red-600";
+                      break;
+                    default:
+                      statusText = "Unknown";
+                      statusClass = "text-gray-600";
+                  }
+
+                  return (
+                    <tr
+                      key={order.id}
+                      className="hover:bg-gray-100 dark:hover:bg-gray-700"
+                    >
+                      <td className="py-3 px-4">{order.id}</td>
+                      <td className="py-3 px-4">{order.tokenId}</td>
+                      <td className="py-3 px-4">{order.buyOpenOrderId}</td>
+                      <td className="py-3 px-4">{order.sellOpenOrderId}</td>
+                      <td className="py-3 px-4">{order.amount}</td>
+                      <td className="py-3 px-4 text-green-600">
+                        {order.buyPrice}
+                      </td>
+                      <td className="py-3 px-4 text-red-600">
+                        {order.sellPrice}
+                      </td>
+                      <td className={`py-3 px-4 font-medium ${statusClass}`}>
+                        {statusText}
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
