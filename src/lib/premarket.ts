@@ -149,7 +149,7 @@ export function autoOpenOrder(
     const amount = Math.floor(Math.random() * (maxAmount - minAmount + 1)) + minAmount;
     
     // Random giá từ 0.8 -> 1.2
-    const price = 0.8 + Math.random() * 0.4;
+    const price = Number((0.8 + Math.random() * 0.4).toFixed(2));
     
     // Địa chỉ token trao đổi (mặc định ETH)
     const exchangeToken = "0x0000000000000000000000000000000000000000";
