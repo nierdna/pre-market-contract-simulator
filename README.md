@@ -1,36 +1,59 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Pre-Market Contract Simulator
+
+A web-based simulator for testing and visualizing pre-market token trading mechanics. This project provides a full-featured front-end interface to interact with a simulated pre-market smart contract, allowing users to test token trading scenarios without deploying actual blockchain contracts.
+
+## Features
+
+- **Token Management**: Register and manage tokens with configurable settlement durations and collateral percentages
+- **Order Placement**: Place buy/sell orders with custom amounts and prices
+- **Order Matching**: Manual or automatic matching of compatible buy and sell orders
+- **Settlement Simulation**: Test the settlement process after token generation events
+- **User Roles**: System owner and trader interfaces with different permissions
+- **Auto Trading**: Configurable automated trading to simulate market activity
+- **Event Logging**: Track all contract events in real-time
+- **Multi-user Simulation**: Test interactions between multiple simulated users
+
+## Technology Stack
+
+- **Frontend**: Next.js 15 with App Router
+- **UI**: TailwindCSS 4
+- **Language**: TypeScript
+- **State Management**: React useState/useContext hooks
 
 ## Getting Started
 
-First, run the development server:
+1. Clone the repository
+2. Install dependencies:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+3. Start the development server:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+pnpm dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. Open [http://localhost:3000](http://localhost:3000) in your browser
 
-## Learn More
+## Usage
 
-To learn more about Next.js, take a look at the following resources:
+The simulator provides a dashboard interface with the following features:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **My Orders**: View and manage your open and matched orders
+- **Place Order**: Create new buy or sell orders
+- **Match Orders**: Manually match compatible orders (owner only)
+- **Settlement**: Simulate the settlement process after TGE
+- **Auto Trader**: Configure automated trading bots (owner only)
+- **Token Management**: Register and configure tokens (owner only)
+- **Market Settings**: Configure market opening/closing times (owner only)
+- **Event Log**: View all contract events
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Development
 
-## Deploy on Vercel
+This project is built with Next.js using the App Router. The main simulator logic is implemented in `src/lib/simulator/PreMarketSimulator.ts` which emulates the behavior of a blockchain smart contract in memory.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## License
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This project is for demonstration and education purposes only.
